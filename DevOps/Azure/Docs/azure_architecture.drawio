@@ -1,0 +1,6 @@
+##To deploy infra using bicep templates
+
+az deployment sub create \
+  --location eastus \
+  --template-file main.bicep \
+  --parameters @parameters/uat.parameters.json

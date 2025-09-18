@@ -1,0 +1,22 @@
+# Default values for the hello chart. Overridden by values-dev.yaml for dev.
+
+replicas: 3
+
+image:
+  repository: <YOUR_ACR_NAME>.azurecr.io/hello   # or a public image for first run
+  tag: "1.0.0"
+  pullPolicy: IfNotPresent
+
+service:
+  port: 80
+  targetPort: 8080      # change to 80 if your test image listens on 80
+
+ingress:
+  enabled: true
+  className: nginx
+  host: hello.<YOUR_DOMAIN>
+  path: /
+
+resources:
+  requests: { cpu: "100m", memory: "128Mi" }
+  limits:   { cpu: "500m", memory: "256Mi" }

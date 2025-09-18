@@ -1,0 +1,9 @@
+# Dev overrides (smaller replica count, different image tag/host).
+
+replicas: 2
+
+image:
+  tag: "1.0.1"
+
+ingress:
+  host: hello.dev.<YOUR_DOMAIN>

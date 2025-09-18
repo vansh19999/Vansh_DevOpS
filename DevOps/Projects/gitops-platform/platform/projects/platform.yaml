@@ -1,0 +1,18 @@
+# AppProject that governs platform add-ons (ingress, cert-manager, rollouts).
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: platform
+  namespace: argocd
+spec:
+  description: Platform add-ons
+  destinations:
+    - namespace: '*'
+      server: https://kubernetes.default.svc
+  sourceRepos:
+    - https://kubernetes.github.io/ingress-nginx
+    - https://charts.jetstack.io
+    - https://argoproj.github.io/argo-helm
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'

@@ -1,0 +1,19 @@
+# AppProject that governs dev application workloads from this monorepo.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: dev
+  namespace: argocd
+spec:
+  description: Dev application workloads (monorepo)
+  destinations:
+    - namespace: 'hello'
+      server: https://kubernetes.default.svc
+  sourceRepos:
+    - https://github.com/vansh19999/Vansh_DevOpS.git
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'

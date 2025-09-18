@@ -1,0 +1,20 @@
+# Deploys the "hello" chart from ./apps/services/hello/charts/hello with dev overrides.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hello
+  namespace: argocd
+spec:
+  project: dev
+  source:
+    repoURL: https://github.com/vansh19999/Vansh_DevOpS.git
+    targetRevision: HEAD
+    path: DevOps/Projects/gitops-platform/apps/services/hello/charts/hello
+    helm:
+      valueFiles: [ "values-dev.yaml" ]
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: hello
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions: [ "CreateNamespace=true" ]

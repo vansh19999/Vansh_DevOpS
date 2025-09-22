@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-stable
+  namespace: app-demo
+  labels: { app: web, track: stable }
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: web, track: stable }
+  template:
+    metadata:
+      labels: { app: web, track: stable }
+    spec:
+      containers:
+        - name: app
+          image: <REPLACE_WITH_ECR_URL>:1.0.0
+          ports: [{ containerPort: 8080 }]
+          env:
+            - name: WELCOME_MSG
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: WELCOME_MSG
+            - name: APP_VERSION
+              value: "1.0.0"
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: API_KEY
+          readinessProbe:
+            httpGet: { path: /healthz, port: 8080 }
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /healthz, port: 8080 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests: { cpu: "100m", memory: "128Mi" }
+            limits:   { cpu: "500m", memory: "256Mi" }
+
+
+#Terms: readinessProbe gates traffic until healthy; livenessProbe restarts stuck pods; resources enable scheduling & autoscaling math.

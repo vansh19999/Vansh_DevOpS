@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web
+  namespace: app-demo
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: demo.<your-domain-or-lb-dns>
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web-stable-svc
+                port:
+                  number: 80

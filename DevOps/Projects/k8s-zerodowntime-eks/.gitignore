@@ -1,0 +1,30 @@
+# Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+terraform.tfvars
+*.auto.tfvars
+
+# kube
+.kube/
+*.kubeconfig
+
+# Node / general
+node_modules/
+*.log
+.env
+.env.*
+.DS_Store
+
+# Secrets / certs
+*.pem
+*.key
+*.p12
+*.csv
+*.crt
+*.der
+*.cer

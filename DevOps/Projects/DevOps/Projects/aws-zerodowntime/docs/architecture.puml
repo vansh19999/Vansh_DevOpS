@@ -1,0 +1,45 @@
+@startuml
+skinparam defaultFontName Monospace
+skinparam shadowing false
+title AWS Infra & Kubernetes Flow
+
+folder "AWS VPC 10.0.0.0/16" {
+  [Internet Gateway] as IGW
+  frame "Public Subnets" {
+    [ALB/NLB (Ingress Service)] as ALB
+    [NAT Gateway] as NAT
+  }
+  frame "Private Subnets" {
+    node "Amazon EKS Cluster" {
+      [EKS Control Plane\n(Managed by AWS)] as CP
+      [Managed Node Group (EC2)] as N1
+      component "Kubernetes Workloads" {
+        [Ingress] as Ingress
+        [Service (ClusterIP)] as Svc
+        [Deployment] as Deploy
+        [Pods] as Pods
+        [ConfigMap/Secret] as Cfg
+      }
+    }
+  }
+}
+
+folder "Amazon ECR" as ECR
+queue "CloudWatch / Container Insights" as CW
+folder "CI/CD: GitHub Actions" as CI
+() "User / Internet" as Internet
+
+Internet --> IGW
+IGW --> ALB
+ALB --> Ingress
+Ingress --> Svc
+Svc --> Deploy
+Deploy --> Pods
+Cfg ..> Pods
+CP ..> N1 : manages
+CP ..> Pods : schedules
+NAT -[hidden]-> Pods
+Pods ..> ECR : pull image
+Pods ..> CW  : logs/metrics
+CI --> ECR : build & push
+@enduml

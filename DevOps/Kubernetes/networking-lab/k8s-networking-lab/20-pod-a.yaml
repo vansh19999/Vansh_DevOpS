@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: testpod-a
+  namespace: netlab
+  labels: { app: a }
+spec:
+  containers:
+  - name: a
+    image: curlimages/curl:8.9.1
+    command: ["sh","-lc","while true; do echo A-OK; sleep 30; done"]

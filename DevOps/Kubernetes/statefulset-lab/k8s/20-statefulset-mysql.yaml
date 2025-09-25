@@ -1,0 +1,338 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+  namespace: stateful-lab
+spec:
+  serviceName: mysql           # must match the headless service
+  replicas: 1                  # minimal: start with one
+  podManagementPolicy: OrderedReady
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3306
+              name: mysql
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-s                  # This manifest defines a StatefulSet for deploying MySQL with persistent storage in Kubernetes.
+                  # StatefulSets provide stable network identities and persistent storage for each pod, ideal for databases.
+                  
+                  apiVersion: apps/v1                        # Specifies the API version for the StatefulSet resource.
+                  kind: StatefulSet                          # Declares the type of resource as StatefulSet.
+                  metadata:
+                    name: mysql                              # The name assigned to this StatefulSet.
+                    namespace: stateful-lab                  # The namespace where this StatefulSet will be created.
+                  spec:
+                    serviceName: mysql                       # References the headless Service for stable network IDs.
+                    replicas: 1                              # Number of MySQL pod replicas to run.
+                    podManagementPolicy: OrderedReady        # Pods are created and deleted in order.
+                    selector:
+                      matchLabels:
+                        app: mysql                           # Selects pods with the label 'app: mysql'.
+                    template:
+                      metadata:
+                        labels:
+                          app: mysql                         # Labels used to organize and select resources.
+                      spec:                      # This manifest defines a StatefulSet for deploying MySQL with persistent storage in Kubernetes.
+                      # StatefulSets provide stable network identities and persistent storage for each pod, ideal for databases.
+                      
+                      apiVersion: apps/v1                        # Specifies the API version for the StatefulSet resource.
+                      kind: StatefulSet                          # Declares the type of resource as StatefulSet.
+                      metadata:
+                        name: mysql                              # The name assigned to this StatefulSet.
+                        namespace: stateful-lab                  # The namespace where this StatefulSet will be created.
+                      spec:
+                        serviceName: mysql                       # References the headless Service for stable network IDs.
+                        replicas: 1                              # Number of MySQL pod replicas to run.
+                        podManagementPolicy: OrderedReady        # Pods are created and deleted in order.
+                        selector:
+                          matchLabels:
+                            app: mysql                           # Selects pods with the label 'app: mysql'.
+                        template:
+                          metadata:
+                            labels:
+                              app: mysql                         # Labels used to organize and select resources.
+                          spec:
+                            terminationGracePeriodSeconds: 30    # Time to wait before forcefully terminating a pod.
+                            containers:
+                              - name: mysql                      # Name of the container.
+                                image: mysql:8.0                 # MySQL container image version.
+                                imagePullPolicy: IfNotPresent    # Pulls image only if not already present locally.
+                                ports:
+                                  - containerPort: 3306          # MySQL port exposed by the container.
+                                    name: mysql                  # Name of the port (for reference).
+                                env:
+                                  - name: MYSQL_ROOT_PASSWORD    # Sets the root password for MySQL.
+                                    valueFrom:
+                                      secretKeyRef:              # References a key from a Kubernetes Secret.
+                                        name: mysql-secret
+                                        key: MYSQL_ROOT_PASSWORD
+                                readinessProbe:                  # Checks if the container is ready to serve requests.
+                                  exec:
+                                    command: ["bash","-lc","mysqladmin ping -h 127.0.0.1 -p$MYSQL_ROOT_PASSWORD"]
+                                  initialDelaySeconds: 15
+                                  periodSeconds: 5
+                                livenessProbe:                   # Checks if the container is still running.
+                                  exec:
+                                    command: ["bash","-lc","mysqladmin ping -h 127.0.0.1 -p$MYSQL_ROOT_PASSWORD"]
+                                  initialDelaySeconds: 30
+                                  periodSeconds: 10
+                                volumeMounts:
+                                  - name: data                   # Mounts the persistent volume to the container.
+                                    mountPath: /var/lib/mysql    # Path inside the container for MySQL data.
+                        volumeClaimTemplates:                    # Defines persistent volume claims for each pod.
+                          - metadata:
+                              name: data                         # Name of the PersistentVolumeClaim for each pod.
+                            spec:
+                              accessModes: ["ReadWriteOnce"]     # Volume can be mounted as read-write by a single node.
+                              storageClassName: ebs-gp3          # Uses the AWS EBS gp3 StorageClass for dynamic provisioning.
+                              resources:
+                                requests:
+                                  storage: 10Gi                  # Requests 10Gi of storage per pod.
+                      
+                      # --- Kubernetes Keywords Explanation ---
+                      
+                      # apiVersion: Specifies the version of the Kubernetes API for the resource.
+                      # kind: The type of Kubernetes resource (StatefulSet in this case).
+                      # metadata: Data that uniquely identifies the resource, such as its name and namespace.
+                      # name: The unique name for the resource within its namespace.
+                      # namespace: The Kubernetes namespace where the resource will reside.
+                      # spec: The specification describing the desired behavior of the resource.
+                      # serviceName: Name of the headless Service used for stable network IDs.
+                      # replicas: Number of pod replicas to run.
+                      # podManagementPolicy: Controls the order of pod creation and termination.
+                      # selector: Used to find pods matching specific labels.
+                      # matchLabels: Key-value pairs for selecting pods.
+                      # template: Pod template for the StatefulSet.
+                      # labels: Key-value pairs for organizing and selecting resources.
+                      # terminationGracePeriodSeconds: Time to wait before forcefully terminating a pod.
+                      # containers: List of containers to run in each pod.
+                      # name (under containers): Name of the container.
+                      # image: Container image to use.
+                      # imagePullPolicy: Policy for pulling container images.
+                      # ports: List of ports exposed by the container.
+                      # containerPort: Port exposed by the container.
+                      # env: Environment variables for the container.
+                      # valueFrom: Specifies where to get the value for an environment variable.
+                      # secretKeyRef: References a key from a Kubernetes Secret.
+                      # readinessProbe: Probe to check if the container is ready.
+                      # livenessProbe: Probe to check if the container is alive.
+                      # volumeMounts: Mounts volumes into the container.
+                      # mountPath: Path inside the container where the volume is mounted.
+                      # volumeClaimTemplates: Defines persistent volume claims for each pod.
+                      # accessModes: Specifies how the volume can be mounted.
+                      # storageClassName: Name of the StorageClass to use for provisioning volumes.
+                      # resources: Resource requests and limits for the volume.
+                      # requests: Minimum resources required.
+                      # storage: Amount of storage requested.
+                      
+                      # --- AWS Keywords Explanation ---
+                      
+                      # storageClassName: ebs-gp3: Refers to the AWS EBS gp3 StorageClass for dynamic volume provisioning.
+                        terminationGracePeriodSeconds: 30    # Time to wait before forcefully terminating a pod.
+                        containers:
+                          - name: mysql                      # Name of the container.
+                            image: mysql:8.0                 # MySQL container image version.
+                            imagePullPolicy: IfNotPresent    # Pulls image only if not already present locally.
+                            ports:
+                              - containerPort: 3306          # MySQL port exposed by the container.
+                                name: mysql                  # Name of the port (for reference).
+                            env:
+                              - name: MYSQL_ROOT_PASSWORD    # Sets the root password for MySQL.
+                                valueFrom:
+                                  secretKeyRef:              # References a key from a Kubernetes Secret.
+                                    name: mysql-secret
+                                    key: MYSQL_ROOT_PASSWORD
+                            readinessProbe:                  # Checks if the container is ready to serve requests.
+                              exec:
+                                command: ["bash","-lc","mysqladmin ping -h 127.0.0.1 -p$MYSQL_ROOT_PASSWORD"]
+                              initialDelaySeconds: 15
+                              periodSeconds: 5
+                            livenessProbe:                   # Checks if the container is still running.
+                              exec:
+                                command: ["bash","-lc","mysqladmin ping -h 127.0.0.1 -p$MYSQL_ROOT_PASSWORD"]
+                              initialDelaySeconds: 30
+                              periodSeconds: 10
+                            volumeMounts:
+                              - name: data                   # Mounts the persistent volume to the container.
+                                mountPath: /var/lib/mysql    # Path inside the container for MySQL data.
+                    volumeClaimTemplates:                    # Defines persistent volume claims for each pod.
+                      - metadata:
+                          name: data                         # Name of the PersistentVolumeClaim for each pod.
+                        spec:
+                          accessModes: ["ReadWriteOnce"]     # Volume can be mounted as read-write by a single node.
+                          storageClassName: ebs-gp3          # Uses the AWS EBS gp3 StorageClass for dynamic provisioning.
+                          resources:
+                            requests:
+                              storage: 10Gi                  # Requests 10Gi of storage per pod.
+                  
+                  # --- Kubernetes Keywords Explanation ---
+                  
+                  # apiVersion: Specifies the version of the Kubernetes API for the resource.
+                  # kind: The type of Kubernetes resource (StatefulSet in this case).
+                  # metadata: Data that uniquely identifies the resource, such as its name and namespace.
+                  # name: The unique name for the resource within its namespace.
+                  # namespace: The Kubernetes namespace where the resource will reside.
+                  # spec: The specification describing the desired behavior of the resource.
+                  # serviceName: Name of the headless Service used for stable network IDs.
+                  # replicas: Number of pod replicas to run.
+                  # podManagementPolicy: Controls the order of pod creation and termination.
+                  # selector: Used to find pods matching specific labels.
+                  # matchLabels: Key-value pairs for selecting pods.
+                  # template: Pod template for the StatefulSet.
+                  # labels: Key-value pairs for organizing and selecting resources.
+                  # terminationGracePeriodSeconds: Time to wait before forcefully terminating a pod.
+                  # containers: List of containers to run in each pod.
+                  # name (under containers): Name of the container.
+                  # image: Container image to use.
+                  # imagePullPolicy: Policy for pulling container images.
+                  # ports: List of ports exposed by the container.
+                  # containerPort: Port exposed by the container.
+                  # env: Environment variables for the container.
+                  # valueFrom: Specifies where to get the value for an environment variable.
+                  # secretKeyRef: References a key from a Kubernetes Secret.
+                  # readinessProbe: Probe to check if the container is ready.
+                  # livenessProbe: Probe to check if the container is alive.
+                  # volumeMounts: Mounts volumes into the container.
+                  # mountPath: Path inside the container where the volume is mounted.
+                  # volumeClaimTemplates: Defines persistent volume claims for each pod.
+                  # accessModes: Specifies how the volume can be mounted.
+                  # storageClassName: Name of the StorageClass to use for provisioning volumes.
+                  # resources: Resource requests and limits for the volume.
+                  # requests: Minimum resources required.
+                  # storage: Amount of storage requested.
+                  
+                  # --- AWS Keywords Explanation ---
+                  
+                  # storageClassName: ebs-gp3: Refers to the AWS EBS gp3 StorageClass for dynamic volume provisioning.ecret
+                  key: MYSQL_ROOT_PASSWORD
+          readinessProbe:
+            exec:
+              command: ["bash","-lc","mysqladmin ping -h 127.0.0.1 -p$MYSQL_ROOT_PASSWORD"]
+            initialDelaySeconds: 15
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["bash","-lc","mysqladmin ping -h 127.0.0.1 -p$MYSQL_ROOT_PASSWORD"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+  volumeClaimTemplates:
+    - metadata:
+        name: data        # This manifest defines a StatefulSet for deploying MySQL with persistent storage in Kubernetes.
+        # StatefulSets provide stable network identities and persistent storage for each pod, ideal for databases.
+        
+        apiVersion: apps/v1                        # Specifies the API version for the StatefulSet resource.
+        kind: StatefulSet                          # Declares the type of resource as StatefulSet.
+        metadata:
+          name: mysql                              # The name assigned to this StatefulSet.
+          namespace: stateful-lab                  # The namespace where this StatefulSet will be created.
+        spec:
+          serviceName: mysql                       # References the headless Service for stable network IDs.
+          replicas: 1                              # Number of MySQL pod replicas to run.
+          podManagementPolicy: OrderedReady        # Pods are created and deleted in order.
+          selector:
+            matchLabels:
+              app: mysql                           # Selects pods with the label 'app: mysql'.
+          template:
+            metadata:
+              labels:
+                app: mysql                         # Labels used to organize and select resources.
+            spec:
+              terminationGracePeriodSeconds: 30    # Time to wait before forcefully terminating a pod.
+              containers:
+                - name: mysql                      # Name of the container.
+                  image: mysql:8.0                 # MySQL container image version.
+                  imagePullPolicy: IfNotPresent    # Pulls image only if not already present locally.
+                  ports:
+                    - containerPort: 3306          # MySQL port exposed by the container.
+                      name: mysql                  # Name of the port (for reference).
+                  env:
+                    - name: MYSQL_ROOT_PASSWORD    # Sets the root password for MySQL.
+                      valueFrom:
+                        secretKeyRef:              # References a key from a Kubernetes Secret.
+                          name: mysql-secret
+                          key: MYSQL_ROOT_PASSWORD
+                  readinessProbe:                  # Checks if the container is ready to serve requests.
+                    exec:
+                      command: ["bash","-lc","mysqladmin ping -h 127.0.0.1 -p$MYSQL_ROOT_PASSWORD"]
+                    initialDelaySeconds: 15
+                    periodSeconds: 5
+                  livenessProbe:                   # Checks if the container is still running.
+                    exec:
+                      command: ["bash","-lc","mysqladmin ping -h 127.0.0.1 -p$MYSQL_ROOT_PASSWORD"]
+                    initialDelaySeconds: 30
+                    periodSeconds: 10
+                  volumeMounts:
+                    - name: data                   # Mounts the persistent volume to the container.
+                      mountPath: /var/lib/mysql    # Path inside the container for MySQL data.
+          volumeClaimTemplates:                    # Defines persistent volume claims for each pod.
+            - metadata:
+                name: data
+              spec:
+                accessModes: ["ReadWriteOnce"]     # Volume can be mounted as read-write by a single node.
+                storageClassName: ebs-gp3          # Uses the AWS EBS gp3 StorageClass for dynamic provisioning.
+                resources:
+                  requests:
+                    storage: 10Gi                  # Requests 10Gi of storage per pod.
+        
+        # --- Kubernetes Keywords Explanation ---
+        
+        # apiVersion: Specifies the version of the Kubernetes API for the resource.
+        # kind: The type of Kubernetes resource (StatefulSet in this case).
+        # metadata: Data that uniquely identifies the resource, such as its name and namespace.
+        # name: The unique name for the resource within its namespace.
+        # namespace: The Kubernetes namespace where the resource will reside.
+        # spec: The specification describing the desired behavior of the resource.
+        # serviceName: Name of the headless Service used for stable network IDs.
+        # replicas: Number of pod replicas to run.
+        # podManagementPolicy: Controls the order of pod creation and termination.
+        # selector: Used to find pods matching specific labels.
+        # matchLabels: Key-value pairs for selecting pods.
+        # template: Pod template for the StatefulSet.
+        # labels: Key-value pairs for organizing and selecting resources.
+        # terminationGracePeriodSeconds: Time to wait before forcefully terminating a pod.
+        # containers: List of containers to run in each pod.
+        # name (under containers): Name of the container.
+        # image: Container image to use.
+        # imagePullPolicy: Policy for pulling container images.
+        # ports: List of ports exposed by the container.
+        # containerPort: Port exposed by the container.
+        # env: Environment variables for the container.
+        # valueFrom: Specifies where to get the value for an environment variable.
+        # secretKeyRef: References a key from a Kubernetes Secret.
+        # readinessProbe: Probe to check if the container is ready.
+        # livenessProbe: Probe to check if the container is alive.
+        # volumeMounts: Mounts volumes into the container.
+        # mountPath: Path inside the container where the volume is mounted.
+        # volumeClaimTemplates: Defines persistent volume claims for each pod.
+        # accessModes: Specifies how the volume can be mounted.
+        # storageClassName: Name of the StorageClass to use for provisioning volumes.
+        # resources: Resource requests and limits for the volume.
+        # requests: Minimum resources required.
+        # storage: Amount of storage requested.
+        
+        # --- AWS Keywords Explanation ---
+        
+        # storageClassName: ebs-gp3: Refers to the AWS EBS gp3 StorageClass for dynamic volume provisioning.
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: ebs-gp3
+        resources:
+          requests:
+            storage: 10Gi

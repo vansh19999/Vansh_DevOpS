@@ -1,0 +1,38 @@
+# This manifest defines a headless Service for MySQL in Kubernetes.
+# Headless Services provide stable DNS records for each pod, useful for StatefulSets.
+
+apiVersion: v1                # Specifies the API version for the Service resource.
+kind: Service                 # Declares the type of resource as Service.
+metadata:
+  name: mysql                 # The name assigned to this Service.
+  namespace: stateful-lab     # The namespace where this Service will be created.
+  labels:
+    app: mysql                # Labels used to organize and select resources.
+spec:
+  clusterIP: None             # Makes the Service headless; no cluster IP is assigned.
+  selector:
+    app: mysql                # Selects pods with the label 'app: mysql'.
+  ports:
+    - name: mysql             # Name of the port (for reference).
+      port: 3306              # Port exposed by the Service.
+      targetPort: 3306        # Port on the pod that the Service forwards to.
+
+# --- Kubernetes Keywords Explanation ---
+
+# apiVersion: Specifies the version of the Kubernetes API for the resource.
+# kind: The type of Kubernetes resource (Service in this case).
+# metadata: Data that uniquely identifies the resource, such as its name, namespace, and labels.
+# name: The unique name for the resource within its namespace.
+# namespace: The Kubernetes namespace where the resource will reside.
+# labels: Key-value pairs for organizing and selecting resources.
+# spec: The specification describing the desired behavior of the resource.
+# clusterIP: The IP address assigned to the Service; 'None' makes it headless.
+# selector: Used to find pods matching specific labels.
+# ports: List of ports exposed by the Service.
+# name (under ports): A reference name for the port.
+# port: The port exposed by the Service.
+# targetPort: The port on the pod that receives traffic from the Service.
+
+# --- AWS Keywords Explanation ---
+
+# No AWS-specific keywords are present in this file.

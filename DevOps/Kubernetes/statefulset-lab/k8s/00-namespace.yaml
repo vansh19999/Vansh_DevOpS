@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: stateful-lab
+# This manifest defines a Kubernetes Namespace resource.
+# Namespaces are used to organize resources within a cluster.
+
+apiVersion: v1           # Specifies the API version for the Kubernetes resource.
+kind: Namespace          # Declares the type of resource as Namespace.
+metadata:                # Metadata provides information about the resource.
+  name: stateful-lab     # The name assigned to this Namespace.
+
+# --- Kubernetes Keywords Explanation ---
+
+# apiVersion: Specifies which version of the Kubernetes API you are using to create this object.
+# kind: The type of Kubernetes resource you want to create (e.g., Namespace, Pod, Deployment).
+# metadata: Data that helps uniquely identify the object, including its name, namespace, labels, and annotations.
+# name: The unique name for the resource within its namespace.
+
+# --- AWS Keywords ---
+# No AWS-specific keywords are present in this file.

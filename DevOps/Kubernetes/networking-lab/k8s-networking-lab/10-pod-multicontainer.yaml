@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sidecar-demo
+  namespace: netlab
+  labels: { app: sidecar-demo }
+spec:
+  containers:
+  - name: api
+    image: hashicorp/http-echo:1.0.0
+    args: ["-listen=:8080","-text=hello-from-api"]
+    ports:
+    - name: http
+      containerPort: 8080
+  - name: helper
+    image: curlimages/curl:8.9.1
+    command: ["sleep","3600"]

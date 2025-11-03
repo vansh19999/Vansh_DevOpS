@@ -1,0 +1,55 @@
+# Azure DevOps multi-stage: plan on PR, apply on main (manual approval via environment)
+trigger:
+  branches:
+    include: [ main ]
+pr:
+  branches:
+    include: [ "*" ]
+
+stages:
+- stage: plan
+  displayName: "Terraform plan"
+  jobs:
+  - job: tf_plan
+    pool: { vmImage: 'ubuntu-latest' }
+    steps:
+    - task: AzureCLI@2
+      displayName: "Terraform init/validate/plan"
+      inputs:
+        azureSubscription: 'azure-oidc-conn'   # <-- create this service connection (OIDC)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          set -e
+          cd DevOps/Projects/aks-terraform-helm-cicd/infra
+          terraform -version
+          terraform init
+          terraform validate
+          terraform plan -out plan.out
+    - publish: DevOps/Projects/aks-terraform-helm-cicd/infra/plan.out
+      artifact: tfplan
+
+- stage: apply
+  displayName: "Terraform apply"
+  dependsOn: plan
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  jobs:
+  - deployment: tf_apply
+    environment: aks-prod   # gate this environment to require approval
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: tfplan
+          - task: AzureCLI@2
+            displayName: "Apply"
+            inputs:
+              azureSubscription: 'azure-oidc-conn'
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                set -e
+                cd DevOps/Projects/aks-terraform-helm-cicd/infra
+                terraform init
+                terraform apply -auto-approve plan.out

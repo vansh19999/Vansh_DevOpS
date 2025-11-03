@@ -1,0 +1,41 @@
+nameOverride: ""
+fullnameOverride: "orders-api"
+
+image:
+  repository: REPLACE_WITH_ACR.azurecr.io/orders-api
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+resources:
+  requests:
+    cpu: "50m"
+    memory: "64Mi"
+  limits:
+    cpu: "250m"
+    memory: "256Mi"
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+ingress:
+  enabled: false
+  className: nginx
+  hosts:
+    - host: orders.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+nodeSelector:
+  pool: spot
+
+hpa:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 60

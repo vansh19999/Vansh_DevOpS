@@ -1,0 +1,10 @@
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.crash
+*.tfvars
+# Node
+node_modules/
+# Kube
+kubeconfig

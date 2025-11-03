@@ -1,0 +1,10 @@
+nodeSelector: {}
+tolerations:
+  - key: "CriticalAddonsOnly"
+    operator: "Exists"
+    effect: "NoSchedule"
+service:
+  type: LoadBalancer
+image:
+  repository: acr3x3gu4.azurecr.io/orders-api
+  tag: "8308f21"

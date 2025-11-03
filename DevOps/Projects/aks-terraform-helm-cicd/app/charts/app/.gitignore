@@ -1,0 +1,27 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn.lock
+pnpm-lock.yaml
+
+# Build artifacts
+dist/
+build/
+*.log
+
+# Terraform local state & caches
+*.tfstate
+*.tfstate.*
+.crash
+.terraform/
+.terraform.lock.hcl
+
+# Helm chart build outputs
+charts/**/tmp/
+charts/**/charts/
+*.tgz
+
+# macOS & editor junk
+.DS_Store
+.idea/
+.vscode/

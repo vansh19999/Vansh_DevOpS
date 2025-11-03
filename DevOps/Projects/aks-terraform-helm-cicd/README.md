@@ -1,7 +1,7 @@
 # aks-terraform-helm-cicd (cost-friendly)
 
 ## Quick start
-1) Ensure you have Owner on RG `devops.experiment`.
+1) Ensure you have Owner on RG.
 2) In Azure DevOps, create a service connection named **azure-oidc-conn** (OIDC, no secrets).
 3) Run the **infra** pipeline to create AKS + ACR + Log Analytics.
 4) Capture output **ACR login server** and set ACR_NAME pipeline variable.
